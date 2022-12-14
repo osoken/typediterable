@@ -1,3 +1,7 @@
-from .core import TypingIterable
+from .core import (
+    TypingIterable,
+    VariableLengthArgumentTypingIterable,
+    VariableLengthKeywordArgumentTypingIterable,
+)
 
-__all__ = ["TypingIterable"]
+__all__ = ["TypingIterable", "VariableLengthArgumentTypingIterable", "VariableLengthKeywordArgumentTypingIterable"]
