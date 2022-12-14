@@ -1,4 +1,10 @@
-from collections.abc import Callable, Iterable
+import sys
+
+if sys.version_info < (3, 9):
+    from typing import Callable, Iterable
+else:
+    from collections.abc import Callable, Iterable
+
 from enum import Enum
 from typing import Any, Generic, Optional, Type, TypeVar
 
@@ -16,7 +22,7 @@ class GenericTypingIterable(Generic[T]):
         self._t = t
 
     def _cast(self, d: Any) -> T:
-        return self._t(d)
+        return self._t(d)  # type: ignore [call-arg]
 
     def __call__(
         self, iter: Iterable[Any], on_error: Optional[Callable[[Any, int, Exception], None]] = None
@@ -24,12 +30,12 @@ class GenericTypingIterable(Generic[T]):
         if on_error is not None:
             for i, d in enumerate(iter):
                 try:
-                    yield self._cast(d)  # type: ignore [call-arg]
+                    yield self._cast(d)
                 except Exception as e:
                     on_error(d, i, e)
         else:
             for d in iter:
-                yield self._cast(d)  # type: ignore [call-arg]
+                yield self._cast(d)
 
 
 class GenericVariableLengthArgumentTypingIterable(Generic[T], GenericTypingIterable[T]):
