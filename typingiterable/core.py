@@ -12,9 +12,10 @@ T = TypeVar("T")
 
 
 class ArgumentType(str, Enum):
-    one_argument = "one_argument"
-    variable_length_argument = "variable_length_argument"
-    variable_length_keyword_argument = "variable_length_keyword_argument"
+    AUTO = "AUTO"
+    ONE_ARGUMENT = "ONE_ARGUMENT"
+    VARIABLE_LENGTH_ARGUMENT = "VARIABLE_LENGTH_ARGUMENT"
+    VARIABLE_LENGTH_KEYWORD_ARGUMENT = "VARIABLE_LENGTH_KEYWORD_ARGUMENT"
 
 
 class GenericTypingIterable(Generic[T]):
@@ -49,19 +50,25 @@ class GenericVariableLengthArgumentKeywordTypingIterable(Generic[T], GenericTypi
 
 
 class GenericTypingIterableFactory:
-    def __init__(self, argument_type: ArgumentType = ArgumentType.one_argument):
+    def __init__(self, argument_type: ArgumentType = ArgumentType.ONE_ARGUMENT):
         self._argument_type = argument_type
 
     def __getitem__(self, t: Type[T]) -> GenericTypingIterable[T]:
-        if self._argument_type == ArgumentType.variable_length_argument:
+        if self._argument_type == ArgumentType.VARIABLE_LENGTH_ARGUMENT:
             return GenericVariableLengthArgumentTypingIterable[T](t)
-        if self._argument_type == ArgumentType.variable_length_keyword_argument:
+        if self._argument_type == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
             return GenericVariableLengthArgumentKeywordTypingIterable[T](t)
+        if self._argument_type == ArgumentType.ONE_ARGUMENT:
+            return GenericTypingIterable[T](t)
+        try:
+            sig = signature(t)
+        except ValueError:
+            return GenericTypingIterable[T](t)
         return GenericTypingIterable[T](t)
 
 
 TypingIterable = GenericTypingIterableFactory()
-VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.variable_length_argument)
+VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.VARIABLE_LENGTH_ARGUMENT)
 VariableLengthKeywordArgumentTypingIterable = GenericTypingIterableFactory(
-    argument_type=ArgumentType.variable_length_keyword_argument
+    argument_type=ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 )
