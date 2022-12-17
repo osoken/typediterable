@@ -1,4 +1,6 @@
 import sys
+from dataclasses import dataclass
+from inspect import Parameter, Signature, signature
 
 if sys.version_info < (3, 9):
     from typing import Callable, Iterable
@@ -16,6 +18,41 @@ class ArgumentType(str, Enum):
     ONE_ARGUMENT = "ONE_ARGUMENT"
     VARIABLE_LENGTH_ARGUMENT = "VARIABLE_LENGTH_ARGUMENT"
     VARIABLE_LENGTH_KEYWORD_ARGUMENT = "VARIABLE_LENGTH_KEYWORD_ARGUMENT"
+
+
+@dataclass(frozen=True)
+class SignatureSummary:
+    positional_only: int = 0
+    positional_or_keyword: int = 0
+    var_positional: bool = False
+    keyword_only: int = 0
+    var_keyword: bool = False
+
+
+def count_argument_type(s: Signature) -> SignatureSummary:
+    positional_only = 0
+    positional_or_keyword = 0
+    var_positional = False
+    keyword_only = 0
+    var_keyword = False
+    for p in s.parameters.values():
+        if p.kind == Parameter.POSITIONAL_ONLY:
+            positional_only += 1
+        elif p.kind == Parameter.POSITIONAL_OR_KEYWORD:
+            positional_or_keyword += 1
+        elif p.kind == Parameter.KEYWORD_ONLY:
+            keyword_only += 1
+        elif p.kind == Parameter.VAR_POSITIONAL:
+            var_positional = True
+        elif p.kind == Parameter.VAR_KEYWORD:
+            var_keyword = True
+    return SignatureSummary(
+        positional_only=positional_only,
+        positional_or_keyword=positional_or_keyword,
+        var_positional=var_positional,
+        keyword_only=keyword_only,
+        var_keyword=var_keyword,
+    )
 
 
 class GenericTypingIterable(Generic[T]):

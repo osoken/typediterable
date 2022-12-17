@@ -1,8 +1,12 @@
+from collections import OrderedDict
+from inspect import Parameter, Signature
+from types import MappingProxyType
 from typing import Any
 
 import pytest
 
 import typingiterable
+from typingiterable import core
 
 
 class TwoArgumentDataType:
@@ -108,3 +112,93 @@ def test_keyword_only_arguments() -> None:
         KeywordOnlyArgumentDataType(x=-3, y=-3, text="three"),
         KeywordOnlyArgumentDataType(x=0, y=0, text="four"),
     ]
+
+
+# def test_auto_adopt_keyword_only_argument() -> None:
+#     actual = []
+#     for d in typingiterable.TypingIterable[KeywordOnlyArgumentDataType](
+#         [
+#             {"x": 10, "y": 12, "text": "one"},
+#             {"x": -1, "y": 3, "text": "two"},
+#             {"x": -3, "y": -3, "text": "three"},
+#             {"y": 0, "x": 0, "text": "four"},
+#         ]
+#     ):
+#         actual.append(d)
+
+#     assert actual == [
+#         KeywordOnlyArgumentDataType(x=10, y=12, text="one"),
+#         KeywordOnlyArgumentDataType(x=-1, y=3, text="two"),
+#         KeywordOnlyArgumentDataType(x=-3, y=-3, text="three"),
+#         KeywordOnlyArgumentDataType(x=0, y=0, text="four"),
+#     ]
+
+
+@pytest.mark.parametrize(
+    ["sig", "expected"],
+    [
+        [
+            Signature(parameters=(Parameter(name="id", kind=Parameter.POSITIONAL_ONLY, annotation=str),)),
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=0, var_positional=False, keyword_only=0, var_keyword=False
+            ),
+        ],
+        [
+            Signature(
+                parameters=(
+                    Parameter(name="id", kind=Parameter.POSITIONAL_ONLY, annotation=str),
+                    Parameter(name="name", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="email", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                )
+            ),
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=2, var_positional=False, keyword_only=0, var_keyword=False
+            ),
+        ],
+        [
+            Signature(
+                parameters=(
+                    Parameter(name="id", kind=Parameter.POSITIONAL_ONLY, annotation=str),
+                    Parameter(name="name", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="email", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="args", kind=Parameter.VAR_POSITIONAL),
+                )
+            ),
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=2, var_positional=True, keyword_only=0, var_keyword=False
+            ),
+        ],
+        [
+            Signature(
+                parameters=(
+                    Parameter(name="id", kind=Parameter.POSITIONAL_ONLY, annotation=str),
+                    Parameter(name="name", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="email", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="args", kind=Parameter.VAR_POSITIONAL),
+                    Parameter(name="age", kind=Parameter.KEYWORD_ONLY, annotation=int),
+                )
+            ),
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=2, var_positional=True, keyword_only=1, var_keyword=False
+            ),
+        ],
+        [
+            Signature(
+                parameters=(
+                    Parameter(name="id", kind=Parameter.POSITIONAL_ONLY, annotation=str),
+                    Parameter(name="name", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="email", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="args", kind=Parameter.VAR_POSITIONAL),
+                    Parameter(name="age", kind=Parameter.KEYWORD_ONLY, annotation=int),
+                    Parameter(name="kwargs", kind=Parameter.VAR_KEYWORD),
+                )
+            ),
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=2, var_positional=True, keyword_only=1, var_keyword=True
+            ),
+        ],
+    ],
+)
+def test_count_argument_type(sig: Signature, expected: core.SignatureSummary) -> None:
+    actual = core.count_argument_type(sig)
+    assert actual == expected
