@@ -55,6 +55,10 @@ def count_argument_type(s: Signature) -> SignatureSummary:
     )
 
 
+def switch_by_argument_type_count(ss: SignatureSummary) -> ArgumentType:
+    ...
+
+
 class GenericTypingIterable(Generic[T]):
     def __init__(self, t: Type[T]):
         self._t = t
@@ -91,20 +95,22 @@ class GenericTypingIterableFactory:
         self._argument_type = argument_type
 
     def __getitem__(self, t: Type[T]) -> GenericTypingIterable[T]:
-        if self._argument_type == ArgumentType.VARIABLE_LENGTH_ARGUMENT:
+        at = self._argument_type
+        if at == ArgumentType.AUTO:
+            try:
+                sig = signature(t)
+            except ValueError:
+                return GenericTypingIterable[T](t)
+            at = switch_by_argument_type_count(count_argument_type(sig))
+        if at == ArgumentType.VARIABLE_LENGTH_ARGUMENT:
             return GenericVariableLengthArgumentTypingIterable[T](t)
-        if self._argument_type == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
+        elif at == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
             return GenericVariableLengthArgumentKeywordTypingIterable[T](t)
-        if self._argument_type == ArgumentType.ONE_ARGUMENT:
-            return GenericTypingIterable[T](t)
-        try:
-            sig = signature(t)
-        except ValueError:
-            return GenericTypingIterable[T](t)
         return GenericTypingIterable[T](t)
 
 
-TypingIterable = GenericTypingIterableFactory()
+TypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.AUTO)
+OneArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.ONE_ARGUMENT)
 VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.VARIABLE_LENGTH_ARGUMENT)
 VariableLengthKeywordArgumentTypingIterable = GenericTypingIterableFactory(
     argument_type=ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT

@@ -4,6 +4,7 @@ from types import MappingProxyType
 from typing import Any
 
 import pytest
+from pytest_mock import MockerFixture
 
 import typingiterable
 from typingiterable import core
@@ -112,6 +113,31 @@ def test_keyword_only_arguments() -> None:
         KeywordOnlyArgumentDataType(x=-3, y=-3, text="three"),
         KeywordOnlyArgumentDataType(x=0, y=0, text="four"),
     ]
+
+
+@pytest.mark.parametrize(
+    ["argument_type", "patch"],
+    [
+        [core.ArgumentType.ONE_ARGUMENT, "typingiterable.core.GenericTypingIterable"],
+        [core.ArgumentType.VARIABLE_LENGTH_ARGUMENT, "typingiterable.core.GenericVariableLengthArgumentTypingIterable"],
+        [
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+            "typingiterable.core.GenericVariableLengthArgumentKeywordTypingIterable",
+        ],
+    ],
+)
+def test_auto_argument_type(argument_type: core.ArgumentType, patch: str, mocker: MockerFixture) -> None:
+    expected = mocker.patch(patch)
+    signature = mocker.patch("typingiterable.core.signature")
+    count_argument_type = mocker.patch("typingiterable.core.count_argument_type")
+    switch_by_argument_type_count = mocker.patch("typingiterable.core.switch_by_argument_type_count")
+    switch_by_argument_type_count.return_value = argument_type
+
+    actual = typingiterable.TypingIterable[TwoArgumentDataType]([])
+    signature.assert_called_once_with(TwoArgumentDataType)
+    count_argument_type.assert_called_once_with(signature.return_value)
+    switch_by_argument_type_count.assert_called_once_with(count_argument_type.return_value)
+    assert actual == expected.__getitem__.return_value.return_value.return_value
 
 
 # def test_auto_adopt_keyword_only_argument() -> None:
