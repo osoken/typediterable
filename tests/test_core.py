@@ -140,24 +140,42 @@ def test_auto_argument_type(argument_type: core.ArgumentType, patch: str, mocker
     assert actual == expected.__getitem__.return_value.return_value.return_value
 
 
-# def test_auto_adopt_keyword_only_argument() -> None:
-#     actual = []
-#     for d in typingiterable.TypingIterable[KeywordOnlyArgumentDataType](
-#         [
-#             {"x": 10, "y": 12, "text": "one"},
-#             {"x": -1, "y": 3, "text": "two"},
-#             {"x": -3, "y": -3, "text": "three"},
-#             {"y": 0, "x": 0, "text": "four"},
-#         ]
-#     ):
-#         actual.append(d)
+def test_auto_adopt_keyword_only_argument() -> None:
+    actual = []
+    for d in typingiterable.TypingIterable[KeywordOnlyArgumentDataType](
+        [
+            {"x": 10, "y": 12, "text": "one"},
+            {"x": -1, "y": 3, "text": "two"},
+            {"x": -3, "y": -3, "text": "three"},
+            {"y": 0, "x": 0, "text": "four"},
+        ]
+    ):
+        actual.append(d)
 
-#     assert actual == [
-#         KeywordOnlyArgumentDataType(x=10, y=12, text="one"),
-#         KeywordOnlyArgumentDataType(x=-1, y=3, text="two"),
-#         KeywordOnlyArgumentDataType(x=-3, y=-3, text="three"),
-#         KeywordOnlyArgumentDataType(x=0, y=0, text="four"),
-#     ]
+    assert actual == [
+        KeywordOnlyArgumentDataType(x=10, y=12, text="one"),
+        KeywordOnlyArgumentDataType(x=-1, y=3, text="two"),
+        KeywordOnlyArgumentDataType(x=-3, y=-3, text="three"),
+        KeywordOnlyArgumentDataType(x=0, y=0, text="four"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ["ss", "expected"],
+    [
+        [core.SignatureSummary(positional_only=1), core.ArgumentType.ONE_ARGUMENT],
+        [core.SignatureSummary(positional_or_keyword=1), core.ArgumentType.ONE_ARGUMENT],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=1), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [core.SignatureSummary(var_positional=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [core.SignatureSummary(positional_or_keyword=2), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [core.SignatureSummary(keyword_only=1), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [core.SignatureSummary(keyword_only=2), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [core.SignatureSummary(var_keyword=True), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+    ],
+)
+def test_switch_by_argument_type_count(ss: core.SignatureSummary, expected: core.ArgumentType) -> None:
+    actual = core.switch_by_argument_type_count(ss)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(

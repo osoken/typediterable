@@ -56,7 +56,12 @@ def count_argument_type(s: Signature) -> SignatureSummary:
 
 
 def switch_by_argument_type_count(ss: SignatureSummary) -> ArgumentType:
-    ...
+    if ss.positional_only > 1:
+        return ArgumentType.VARIABLE_LENGTH_ARGUMENT
+    if ss.positional_only == 1:
+        if ss.positional_or_keyword == 0 and ss.keyword_only == 0:
+            return ArgumentType.ONE_ARGUMENT
+    return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 
 
 class GenericTypingIterable(Generic[T]):
