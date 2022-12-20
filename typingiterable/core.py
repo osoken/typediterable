@@ -61,6 +61,13 @@ def switch_by_argument_type_count(ss: SignatureSummary) -> ArgumentType:
     if ss.positional_only == 1:
         if ss.positional_or_keyword == 0 and ss.keyword_only == 0:
             return ArgumentType.ONE_ARGUMENT
+        if ss.positional_or_keyword > 0:
+            return ArgumentType.VARIABLE_LENGTH_ARGUMENT
+    if ss.positional_or_keyword == 1:
+        if ss.keyword_only == 0:
+            return ArgumentType.ONE_ARGUMENT
+    if ss.positional_or_keyword == 0 and ss.keyword_only == 0 and ss.var_positional:
+        return ArgumentType.VARIABLE_LENGTH_ARGUMENT
     return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 
 
