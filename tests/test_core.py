@@ -164,18 +164,279 @@ def test_auto_adopt_keyword_only_argument() -> None:
     ["ss", "expected"],
     [
         [core.SignatureSummary(positional_only=1), core.ArgumentType.ONE_ARGUMENT],
+        [core.SignatureSummary(positional_only=2), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
         [core.SignatureSummary(positional_or_keyword=1), core.ArgumentType.ONE_ARGUMENT],
         [core.SignatureSummary(positional_only=1, positional_or_keyword=1), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
-        [core.SignatureSummary(var_positional=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=1), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
         [core.SignatureSummary(positional_or_keyword=2), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=2), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=2), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
         [core.SignatureSummary(keyword_only=1), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=1),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=1),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
         [core.SignatureSummary(keyword_only=2), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=2),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [core.SignatureSummary(positional_or_keyword=2, keyword_only=2), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [core.SignatureSummary(var_positional=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [core.SignatureSummary(positional_only=1, var_positional=True), core.ArgumentType.ONE_ARGUMENT],
+        [core.SignatureSummary(positional_only=2, var_positional=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [
+            core.SignatureSummary(positional_or_keyword=1, var_positional=True),
+            core.ArgumentType.ONE_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=1, positional_or_keyword=1, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=2, positional_or_keyword=1, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=1, positional_or_keyword=2, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=2, positional_or_keyword=2, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(keyword_only=1, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=1, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=1, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(keyword_only=2, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=2, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=2, var_positional=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
         [core.SignatureSummary(var_keyword=True), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [core.SignatureSummary(positional_only=1, var_keyword=True), core.ArgumentType.ONE_ARGUMENT],
+        [core.SignatureSummary(positional_only=2, var_keyword=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [
+            core.SignatureSummary(positional_or_keyword=1, var_keyword=True),
+            core.ArgumentType.ONE_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=1, positional_or_keyword=1, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=2, positional_or_keyword=1, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=1, positional_or_keyword=2, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=2, positional_or_keyword=2, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [core.SignatureSummary(keyword_only=1, var_keyword=True), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=1, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=1, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [core.SignatureSummary(keyword_only=2, var_keyword=True), core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=2, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=2, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [core.SignatureSummary(var_positional=True, var_keyword=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [
+            core.SignatureSummary(positional_only=1, var_positional=True, var_keyword=True),
+            core.ArgumentType.ONE_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=2, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=1, var_positional=True, var_keyword=True),
+            core.ArgumentType.ONE_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=1, positional_or_keyword=1, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=2, positional_or_keyword=1, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=1, positional_or_keyword=2, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_only=2, positional_or_keyword=2, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(keyword_only=1, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=1, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=1, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(keyword_only=2, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=1, keyword_only=2, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=2, var_positional=True, var_keyword=True),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
     ],
 )
 def test_switch_by_argument_type_count(ss: core.SignatureSummary, expected: core.ArgumentType) -> None:
     actual = core.switch_by_argument_type_count(ss)
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ["ss"],
+    [
+        [core.SignatureSummary()],
+        [core.SignatureSummary(positional_only=1, keyword_only=1)],
+        [core.SignatureSummary(positional_only=2, keyword_only=1)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=1, keyword_only=1)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=1, keyword_only=1)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=2, keyword_only=1)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=2, keyword_only=1)],
+        [core.SignatureSummary(positional_only=1, keyword_only=2)],
+        [core.SignatureSummary(positional_only=2, keyword_only=2)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=1, keyword_only=2)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=1, keyword_only=2)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=2, keyword_only=2)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=2, keyword_only=2)],
+        [core.SignatureSummary(positional_only=1, keyword_only=1, var_positional=True)],
+        [core.SignatureSummary(positional_only=2, keyword_only=1, var_positional=True)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=1, keyword_only=1, var_positional=True)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=1, keyword_only=1, var_positional=True)],
+        [
+            core.SignatureSummary(positional_only=1, positional_or_keyword=2, keyword_only=1, var_positional=True),
+        ],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=2, keyword_only=1, var_positional=True)],
+        [core.SignatureSummary(positional_only=1, keyword_only=2, var_positional=True)],
+        [core.SignatureSummary(positional_only=2, keyword_only=2, var_positional=True)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=1, keyword_only=2, var_positional=True)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=1, keyword_only=2, var_positional=True)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=2, keyword_only=2, var_positional=True)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=2, keyword_only=2, var_positional=True)],
+        [core.SignatureSummary(positional_only=1, keyword_only=1, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, keyword_only=1, var_keyword=True)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=1, keyword_only=1, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=1, keyword_only=1, var_keyword=True)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=2, keyword_only=1, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=2, keyword_only=1, var_keyword=True)],
+        [core.SignatureSummary(positional_only=1, keyword_only=2, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, keyword_only=2, var_keyword=True)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=1, keyword_only=2, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=1, keyword_only=2, var_keyword=True)],
+        [core.SignatureSummary(positional_only=1, positional_or_keyword=2, keyword_only=2, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, positional_or_keyword=2, keyword_only=2, var_keyword=True)],
+        [core.SignatureSummary(positional_only=1, keyword_only=1, var_positional=True, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, keyword_only=1, var_positional=True, var_keyword=True)],
+        [
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=1, keyword_only=1, var_positional=True, var_keyword=True
+            )
+        ],
+        [
+            core.SignatureSummary(
+                positional_only=2, positional_or_keyword=1, keyword_only=1, var_positional=True, var_keyword=True
+            )
+        ],
+        [
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=2, keyword_only=1, var_positional=True, var_keyword=True
+            )
+        ],
+        [
+            core.SignatureSummary(
+                positional_only=2, positional_or_keyword=2, keyword_only=1, var_positional=True, var_keyword=True
+            )
+        ],
+        [core.SignatureSummary(positional_only=1, keyword_only=2, var_positional=True, var_keyword=True)],
+        [core.SignatureSummary(positional_only=2, keyword_only=2, var_positional=True, var_keyword=True)],
+        [
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=1, keyword_only=2, var_positional=True, var_keyword=True
+            )
+        ],
+        [
+            core.SignatureSummary(
+                positional_only=2, positional_or_keyword=1, keyword_only=2, var_positional=True, var_keyword=True
+            )
+        ],
+        [
+            core.SignatureSummary(
+                positional_only=1, positional_or_keyword=2, keyword_only=2, var_positional=True, var_keyword=True
+            )
+        ],
+        [
+            core.SignatureSummary(
+                positional_only=2, positional_or_keyword=2, keyword_only=2, var_positional=True, var_keyword=True
+            )
+        ],
+    ],
+)
+def test_switch_by_argument_type_count_error_cases(ss: core.SignatureSummary) -> None:
+    with pytest.raises(ValueError):
+        _ = core.switch_by_argument_type_count(ss)
 
 
 @pytest.mark.parametrize(
