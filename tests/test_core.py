@@ -185,7 +185,10 @@ def test_auto_adopt_keyword_only_argument() -> None:
             core.SignatureSummary(positional_or_keyword=1, keyword_only=2),
             core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
         ],
-        [core.SignatureSummary(positional_or_keyword=2, keyword_only=2), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
+        [
+            core.SignatureSummary(positional_or_keyword=2, keyword_only=2),
+            core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
+        ],
         [core.SignatureSummary(var_positional=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],
         [core.SignatureSummary(positional_only=1, var_positional=True), core.ArgumentType.ONE_ARGUMENT],
         [core.SignatureSummary(positional_only=2, var_positional=True), core.ArgumentType.VARIABLE_LENGTH_ARGUMENT],

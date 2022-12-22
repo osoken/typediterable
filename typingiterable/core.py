@@ -58,21 +58,23 @@ def count_argument_type(s: Signature) -> SignatureSummary:
 def switch_by_argument_type_count(ss: SignatureSummary) -> ArgumentType:
     if ss.positional_only > 0 and ss.keyword_only > 0:
         raise ValueError("signature not supported")
-    if (
-        ss.positional_only == 0
-        and ss.keyword_only == 0
-        and ss.positional_or_keyword == 0
-        and not ss.var_keyword
-        and not ss.var_positional
-    ):
+    if ss.positional_only == 0 and ss.keyword_only == 0 and ss.positional_or_keyword == 0:
+        if ss.var_positional:
+            return ArgumentType.VARIABLE_LENGTH_ARGUMENT
+        elif ss.var_keyword:
+            return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
         raise ValueError("signature not supported")
     if ss.keyword_only > 0:
         return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
     if ss.positional_only + ss.positional_or_keyword == 1:
         return ArgumentType.ONE_ARGUMENT
-    if ss.positional_only + ss.positional_or_keyword > 1:
+    if (
+        ss.positional_only + ss.positional_or_keyword > 1
+        and ss.positional_only >= 1
+        or ss.var_positional
+        and not ss.var_keyword
+    ):
         return ArgumentType.VARIABLE_LENGTH_ARGUMENT
-
     return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 
 
