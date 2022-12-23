@@ -129,14 +129,14 @@ def test_keyword_only_arguments() -> None:
 def test_auto_argument_type(argument_type: core.ArgumentType, patch: str, mocker: MockerFixture) -> None:
     expected = mocker.patch(patch)
     signature = mocker.patch("typingiterable.core.signature")
-    count_argument_type = mocker.patch("typingiterable.core.count_argument_type")
+    get_signature_summary = mocker.patch("typingiterable.core.get_signature_summary")
     switch_by_argument_type_count = mocker.patch("typingiterable.core.switch_by_argument_type_count")
     switch_by_argument_type_count.return_value = argument_type
 
     actual = typingiterable.TypingIterable[TwoArgumentDataType]([])
     signature.assert_called_once_with(TwoArgumentDataType)
-    count_argument_type.assert_called_once_with(signature.return_value)
-    switch_by_argument_type_count.assert_called_once_with(count_argument_type.return_value)
+    get_signature_summary.assert_called_once_with(signature.return_value)
+    switch_by_argument_type_count.assert_called_once_with(get_signature_summary.return_value)
     assert actual == expected.__getitem__.return_value.return_value.return_value
 
 
@@ -507,6 +507,6 @@ def test_switch_by_argument_type_count_error_cases(ss: core.SignatureSummary) ->
         ],
     ],
 )
-def test_count_argument_type(sig: Signature, expected: core.SignatureSummary) -> None:
-    actual = core.count_argument_type(sig)
+def test_get_signature_summary(sig: Signature, expected: core.SignatureSummary) -> None:
+    actual = core.get_signature_summary(sig)
     assert actual == expected
