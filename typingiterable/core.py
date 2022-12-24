@@ -29,7 +29,7 @@ class SignatureSummary:
     var_keyword: bool = False
 
 
-def get_signature_summary(s: Signature) -> SignatureSummary:
+def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
     positional_only = 0
     positional_or_keyword = 0
     var_positional = False
@@ -55,7 +55,7 @@ def get_signature_summary(s: Signature) -> SignatureSummary:
     )
 
 
-def switch_by_argument_type_count(ss: SignatureSummary) -> ArgumentType:
+def _compute_argument_type_by_signature_summary(ss: SignatureSummary) -> ArgumentType:
     if ss.positional_only > 0 and ss.keyword_only > 0:
         raise ValueError("signature not supported")
     if ss.positional_only == 0 and ss.keyword_only == 0 and ss.positional_or_keyword == 0:
@@ -120,7 +120,7 @@ class GenericTypingIterableFactory:
                 sig = signature(t)
             except ValueError:
                 return GenericTypingIterable[T](t)
-            at = switch_by_argument_type_count(get_signature_summary(sig))
+            at = _compute_argument_type_by_signature_summary(_compute_signature_summary_by_signature(sig))
         if at == ArgumentType.VARIABLE_LENGTH_ARGUMENT:
             return GenericVariableLengthArgumentTypingIterable[T](t)
         elif at == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
