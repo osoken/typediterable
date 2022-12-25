@@ -1,4 +1,6 @@
 import sys
+from dataclasses import dataclass
+from inspect import Parameter, Signature, signature
 
 if sys.version_info < (3, 9):
     from typing import Callable, Iterable
@@ -12,9 +14,68 @@ T = TypeVar("T")
 
 
 class ArgumentType(str, Enum):
-    one_argument = "one_argument"
-    variable_length_argument = "variable_length_argument"
-    variable_length_keyword_argument = "variable_length_keyword_argument"
+    AUTO = "AUTO"
+    ONE_ARGUMENT = "ONE_ARGUMENT"
+    VARIABLE_LENGTH_ARGUMENT = "VARIABLE_LENGTH_ARGUMENT"
+    VARIABLE_LENGTH_KEYWORD_ARGUMENT = "VARIABLE_LENGTH_KEYWORD_ARGUMENT"
+
+
+@dataclass(frozen=True)
+class SignatureSummary:
+    positional_only: int = 0
+    positional_or_keyword: int = 0
+    var_positional: bool = False
+    keyword_only: int = 0
+    var_keyword: bool = False
+
+
+def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
+    positional_only = 0
+    positional_or_keyword = 0
+    var_positional = False
+    keyword_only = 0
+    var_keyword = False
+    for p in s.parameters.values():
+        if p.kind == Parameter.POSITIONAL_ONLY:
+            positional_only += 1
+        elif p.kind == Parameter.POSITIONAL_OR_KEYWORD:
+            positional_or_keyword += 1
+        elif p.kind == Parameter.KEYWORD_ONLY:
+            keyword_only += 1
+        elif p.kind == Parameter.VAR_POSITIONAL:
+            var_positional = True
+        elif p.kind == Parameter.VAR_KEYWORD:
+            var_keyword = True
+    return SignatureSummary(
+        positional_only=positional_only,
+        positional_or_keyword=positional_or_keyword,
+        var_positional=var_positional,
+        keyword_only=keyword_only,
+        var_keyword=var_keyword,
+    )
+
+
+def _compute_argument_type_by_signature_summary(ss: SignatureSummary) -> ArgumentType:
+    if ss.positional_only > 0 and ss.keyword_only > 0:
+        raise ValueError("signature not supported")
+    if ss.positional_only == 0 and ss.keyword_only == 0 and ss.positional_or_keyword == 0:
+        if ss.var_positional:
+            return ArgumentType.VARIABLE_LENGTH_ARGUMENT
+        elif ss.var_keyword:
+            return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
+        raise ValueError("signature not supported")
+    if ss.keyword_only > 0:
+        return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
+    if ss.positional_only + ss.positional_or_keyword == 1:
+        return ArgumentType.ONE_ARGUMENT
+    if (
+        ss.positional_only + ss.positional_or_keyword > 1
+        and ss.positional_only >= 1
+        or ss.var_positional
+        and not ss.var_keyword
+    ):
+        return ArgumentType.VARIABLE_LENGTH_ARGUMENT
+    return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 
 
 class GenericTypingIterable(Generic[T]):
@@ -49,19 +110,27 @@ class GenericVariableLengthArgumentKeywordTypingIterable(Generic[T], GenericTypi
 
 
 class GenericTypingIterableFactory:
-    def __init__(self, argument_type: ArgumentType = ArgumentType.one_argument):
+    def __init__(self, argument_type: ArgumentType = ArgumentType.ONE_ARGUMENT):
         self._argument_type = argument_type
 
     def __getitem__(self, t: Type[T]) -> GenericTypingIterable[T]:
-        if self._argument_type == ArgumentType.variable_length_argument:
+        at = self._argument_type
+        if at == ArgumentType.AUTO:
+            try:
+                sig = signature(t)
+            except ValueError:
+                return GenericTypingIterable[T](t)
+            at = _compute_argument_type_by_signature_summary(_compute_signature_summary_by_signature(sig))
+        if at == ArgumentType.VARIABLE_LENGTH_ARGUMENT:
             return GenericVariableLengthArgumentTypingIterable[T](t)
-        if self._argument_type == ArgumentType.variable_length_keyword_argument:
+        elif at == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
             return GenericVariableLengthArgumentKeywordTypingIterable[T](t)
         return GenericTypingIterable[T](t)
 
 
-TypingIterable = GenericTypingIterableFactory()
-VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.variable_length_argument)
+TypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.AUTO)
+OneArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.ONE_ARGUMENT)
+VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.VARIABLE_LENGTH_ARGUMENT)
 VariableLengthKeywordArgumentTypingIterable = GenericTypingIterableFactory(
-    argument_type=ArgumentType.variable_length_keyword_argument
+    argument_type=ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 )
