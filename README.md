@@ -10,6 +10,8 @@ pip install git+ssh://git@github.com/osoken/typingiterable.git
 
 ## Example
 
+The following example shows how the main component `typingiterable.TypingIterable` works:
+
 ```py
 from dataclasses import dataclass
 from typingiterable import TypingIterable
@@ -23,4 +25,3 @@ raw_data = [{"id": 0, "name": "Alice"}, {"id": 1, "name": "Bob"}]
 for d in TypingIterable[User](raw_data):
     assert isinstance(d, User)
 ```
-
