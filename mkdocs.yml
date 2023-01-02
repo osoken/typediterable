@@ -5,3 +5,6 @@ theme:
   name: "material"
 repo_name: osoken/typingiterable
 repo_url: https://github.com/osoken/typingiterable
+plugins:
+  - include-markdown
+  - search
