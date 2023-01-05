@@ -86,16 +86,16 @@ class GenericTypingIterable(Generic[T]):
         return self._t(d)  # type: ignore [call-arg]
 
     def __call__(
-        self, iter: Iterable[Any], on_error: Optional[Callable[[Any, int, Exception], None]] = None
+        self, it: Iterable[Any], on_error: Optional[Callable[[Any, int, Exception], None]] = None
     ) -> Iterable[T]:
         if on_error is not None:
-            for i, d in enumerate(iter):
+            for i, d in enumerate(it):
                 try:
                     yield self._cast(d)
                 except Exception as e:
                     on_error(d, i, e)
         else:
-            for d in iter:
+            for d in it:
                 yield self._cast(d)
 
 

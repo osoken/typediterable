@@ -1,0 +1,10 @@
+site_name: typingiterable documentation
+site_description: A Simple python package to apply typing to iterables.
+
+theme:
+  name: "material"
+repo_name: osoken/typingiterable
+repo_url: https://github.com/osoken/typingiterable
+plugins:
+  - include-markdown
+  - search

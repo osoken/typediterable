@@ -23,5 +23,8 @@ setup(
     long_description_content_type="text/markdown",
     packages=[__package_name__],
     install_requires=[],
-    extras_require={"dev": ["flake8", "pytest", "black", "mypy", "tox", "isort", "pytest-mock"]},
+    extras_require={
+        "dev": ["flake8", "pytest", "black", "mypy", "tox", "isort", "pytest-mock"],
+        "docs": ["mkdocs", "mkdocs-material", "mkdocs-include-markdown-plugin"],
+    },
 )
