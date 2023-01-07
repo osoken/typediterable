@@ -8,7 +8,9 @@
 pip install git+ssh://git@github.com/osoken/typingiterable.git
 ```
 
-## Example
+## Features and Examples
+
+### Actual Typing with Type Hint Notation
 
 The following example shows how the main component `typingiterable.TypingIterable` works:
 
@@ -41,6 +43,8 @@ raw_data = [{"id": 0, "name": "Alice"}, {"id": 1, "name": "Bob"}]
 for d in (User(**d) for d in raw_data):
     assert isinstance(d, User)
 ```
+
+### Error Handling
 
 `typingiterable.TypingIterable` also has the error handling feature.
 
