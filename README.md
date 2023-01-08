@@ -95,3 +95,15 @@ for i, raw_d in enumerate(raw_data):
         print(f"{i}th element `{raw_d}` is invalid due to the following error: {e}")
     assert isinstance(d, User)
 ```
+
+### Automatic Unpacking Arguments
+
+`typingiterable.TypingIterable` checks the signature and automatically unpack the argument. If the type's constructor is single-argument, it doesn't unpack.
+
+```py
+from typingiterable import TypingIterable
+
+raw_data = ["1", "2", "3", "4"]
+for d in TypingIterable[int](raw_data):
+    assert isinstance(d, int)
+```
