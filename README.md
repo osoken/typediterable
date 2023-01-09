@@ -107,3 +107,5 @@ raw_data = ["1", "2", "3", "4"]
 for d in TypingIterable[int](raw_data):
     assert isinstance(d, int)
 ```
+
+For functionf which takes multiple positional arguments or multiple keyword arguments, such as `dataclass` or `pydantic.BaseModel`'s, it unpacks just like the above example.
