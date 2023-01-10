@@ -98,7 +98,9 @@ for i, raw_d in enumerate(raw_data):
 
 ### Automatic Unpacking Arguments
 
-`typingiterable.TypingIterable` checks the signature and automatically unpack the argument. If the type's constructor is single-argument, it doesn't unpack.
+`typingiterable.TypingIterable` checks the signature and automatically unpacks the arguments.
+For functions which takes multiple positional arguments or multiple keyword arguments, such as `dataclass` and `pydantic.BaseModel`, it unpacks just like the above example.
+If the function is single-argument, no unpacking is done.
 
 ```py
 from typingiterable import TypingIterable
@@ -107,5 +109,3 @@ raw_data = ["1", "2", "3", "4"]
 for d in TypingIterable[int](raw_data):
     assert isinstance(d, int)
 ```
-
-For functionf which takes multiple positional arguments or multiple keyword arguments, such as `dataclass` or `pydantic.BaseModel`'s, it unpacks just like the above example.
