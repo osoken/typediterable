@@ -8,7 +8,9 @@
 pip install git+ssh://git@github.com/osoken/typingiterable.git
 ```
 
-## Example
+## Features and Examples
+
+### Actual Typing with Type Hint Notation
 
 The following example shows how the main component `typingiterable.TypingIterable` works:
 
@@ -41,6 +43,8 @@ raw_data = [{"id": 0, "name": "Alice"}, {"id": 1, "name": "Bob"}]
 for d in (User(**d) for d in raw_data):
     assert isinstance(d, User)
 ```
+
+### Error Handling
 
 `typingiterable.TypingIterable` also has the error handling feature.
 
@@ -90,4 +94,18 @@ for i, raw_d in enumerate(raw_data):
     except Exception as e:
         print(f"{i}th element `{raw_d}` is invalid due to the following error: {e}")
     assert isinstance(d, User)
+```
+
+### Automatic Unpacking Arguments
+
+`typingiterable.TypingIterable` checks the signature and automatically unpacks the arguments.
+For functions which takes multiple positional arguments or multiple keyword arguments, such as `dataclass` and `pydantic.BaseModel`, it unpacks just like the above example.
+If the function is single-argument, no unpacking is done.
+
+```py
+from typingiterable import TypingIterable
+
+raw_data = ["1", "2", "3", "4"]
+for d in TypingIterable[int](raw_data):
+    assert isinstance(d, int)
 ```
