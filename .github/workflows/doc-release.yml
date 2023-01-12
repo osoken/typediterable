@@ -1,0 +1,31 @@
+name: doc-release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-docs-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install tox
+        run: pip install tox
+
+      - name: Setup git config
+        run: |
+          git config --global user.name '${{ github.actor }}'
+          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git fetch
+          git checkout main
+      - name: Build and release
+        run: tox -e docs-release
