@@ -46,6 +46,11 @@ class KeywordOnlyArgumentDataType(TwoArgumentDataType):
         return self.text == other.text
 
 
+class TwoArgumentOneDefaultDataType(TwoArgumentDataType):
+    def __init__(self, x: int, y: int = 0):
+        super(TwoArgumentOneDefaultDataType, self).__init__(x, y)
+
+
 def test_iterate() -> None:
     actual = list(typingiterable.TypingIterable[int](["122", "231", "0", "2", 2.3]))
     assert actual == [122, 231, 0, 2, 2]
@@ -516,3 +521,10 @@ def test__compute_argument_type_by_signature_summary_error_cases(ss: core.Signat
 def test__compute_signature_summary_by_signature(sig: Signature, expected: core.SignatureSummary) -> None:
     actual = core._compute_signature_summary_by_signature(sig)
     assert actual == expected
+
+
+def test_type_with_default() -> None:
+    raw_data = [10]
+    expected = [TwoArgumentOneDefaultDataType(10)]
+
+    assert list(typingiterable.TypingIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
