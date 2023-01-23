@@ -8,7 +8,7 @@ else:
     from collections.abc import Callable, Iterable
 
 from enum import Enum
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, Tuple, Type, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -20,12 +20,15 @@ class ArgumentType(str, Enum):
     VARIABLE_LENGTH_KEYWORD_ARGUMENT = "VARIABLE_LENGTH_KEYWORD_ARGUMENT"
 
 
+IntRange = Tuple[int, int]
+
+
 @dataclass(frozen=True)
 class SignatureSummary:
-    positional_only: int = 0
-    positional_or_keyword: int = 0
+    positional_only: Union[int, IntRange] = 0
+    positional_or_keyword: Union[int, IntRange] = 0
     var_positional: bool = False
-    keyword_only: int = 0
+    keyword_only: Union[int, IntRange] = 0
     var_keyword: bool = False
 
 
