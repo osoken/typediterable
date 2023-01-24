@@ -137,3 +137,5 @@ VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_typ
 VariableLengthKeywordArgumentTypingIterable = GenericTypingIterableFactory(
     argument_type=ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 )
+VarArgTypingIterable = VariableLengthArgumentTypingIterable
+KwArgTypingIterable = VariableLengthKeywordArgumentTypingIterable
