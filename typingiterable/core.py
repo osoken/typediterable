@@ -112,6 +112,15 @@ class GenericVariableLengthArgumentKeywordTypingIterable(Generic[T], GenericTypi
         return self._t(**d)
 
 
+class GenericK2OFallbackableTypingIterable(Generic[T], GenericTypingIterable[T]):
+    def _cast(self, d: Any) -> T:
+        try:
+            return self._t(**d)
+        except TypeError:
+            ...
+        return self._t(d)
+
+
 class GenericTypingIterableFactory:
     def __init__(self, argument_type: ArgumentType = ArgumentType.ONE_ARGUMENT):
         self._argument_type = argument_type
