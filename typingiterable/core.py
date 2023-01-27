@@ -18,6 +18,7 @@ class ArgumentType(str, Enum):
     ONE_ARGUMENT = "ONE_ARGUMENT"
     VARIABLE_LENGTH_ARGUMENT = "VARIABLE_LENGTH_ARGUMENT"
     VARIABLE_LENGTH_KEYWORD_ARGUMENT = "VARIABLE_LENGTH_KEYWORD_ARGUMENT"
+    K2O_FALLBACKABLE = "K2O_FALLBACKABLE"
 
 
 IntRange = Tuple[int, int]
@@ -137,6 +138,8 @@ class GenericTypingIterableFactory:
             return GenericVariableLengthArgumentTypingIterable[T](t)
         elif at == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
             return GenericVariableLengthArgumentKeywordTypingIterable[T](t)
+        elif at == ArgumentType.K2O_FALLBACKABLE:
+            return GenericK2OFallbackableTypingIterable[T](t)
         return GenericTypingIterable[T](t)
 
 
@@ -148,3 +151,4 @@ VariableLengthKeywordArgumentTypingIterable = GenericTypingIterableFactory(
 )
 VarArgTypingIterable = VariableLengthArgumentTypingIterable
 KwArgTypingIterable = VariableLengthKeywordArgumentTypingIterable
+K2OFallbackableTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.K2O_FALLBACKABLE)
