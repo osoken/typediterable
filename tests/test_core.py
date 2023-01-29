@@ -1,6 +1,4 @@
-from collections import OrderedDict
 from inspect import Parameter, Signature
-from types import MappingProxyType
 from typing import Any
 
 import pytest
@@ -528,3 +526,12 @@ def test_type_with_default() -> None:
     expected = [TwoArgumentOneDefaultDataType(10)]
 
     assert list(typingiterable.TypingIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
+
+
+def test_k2o_fallbackable_typing_itrerable() -> None:
+    from typingiterable.core import K2OFallbackableTypingIterable
+
+    raw_data = [10, {"x": 1, "y": 2}]
+    expected = [TwoArgumentOneDefaultDataType(10), TwoArgumentOneDefaultDataType(x=1, y=2)]
+
+    assert list(K2OFallbackableTypingIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
