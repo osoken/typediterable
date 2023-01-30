@@ -351,6 +351,7 @@ def test_auto_adopt_keyword_only_argument() -> None:
             core.SignatureSummary(positional_or_keyword=2, keyword_only=2, var_positional=True, var_keyword=True),
             core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
         ],
+        [core.SignatureSummary(positional_or_keyword=[1, 2]), core.ArgumentType.K2O_FALLBACKABLE],
     ],
 )
 def test__compute_argument_type_by_signature_summary(ss: core.SignatureSummary, expected: core.ArgumentType) -> None:
@@ -513,6 +514,15 @@ def test__compute_argument_type_by_signature_summary_error_cases(ss: core.Signat
             core.SignatureSummary(
                 positional_only=1, positional_or_keyword=2, var_positional=True, keyword_only=1, var_keyword=True
             ),
+        ],
+        [
+            Signature(
+                parameters=(
+                    Parameter(name="id", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="name", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str, default="john"),
+                )
+            ),
+            core.SignatureSummary(positional_or_keyword=[1, 2]),
         ],
     ],
 )

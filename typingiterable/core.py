@@ -24,6 +24,18 @@ class ArgumentType(str, Enum):
 IntRange = Tuple[int, int]
 
 
+def max_num(x: Union[int, IntRange]) -> int:
+    if isinstance(x, int):
+        return x
+    return max(x)
+
+
+def min_num(x: Union[int, IntRange]) -> int:
+    if isinstance(x, int):
+        return x
+    return min(x)
+
+
 @dataclass(frozen=True)
 class SignatureSummary:
     positional_only: Union[int, IntRange] = 0
@@ -60,25 +72,27 @@ def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
 
 
 def _compute_argument_type_by_signature_summary(ss: SignatureSummary) -> ArgumentType:
-    if ss.positional_only > 0 and ss.keyword_only > 0:
+    if max_num(ss.positional_only) > 0 and max_num(ss.keyword_only) > 0:
         raise ValueError("signature not supported")
-    if ss.positional_only == 0 and ss.keyword_only == 0 and ss.positional_or_keyword == 0:
+    if max_num(ss.positional_only) == 0 and max_num(ss.keyword_only) == 0 and max_num(ss.positional_or_keyword) == 0:
         if ss.var_positional:
             return ArgumentType.VARIABLE_LENGTH_ARGUMENT
         elif ss.var_keyword:
             return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
         raise ValueError("signature not supported")
-    if ss.keyword_only > 0:
+    if min_num(ss.keyword_only) > 0:
         return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
-    if ss.positional_only + ss.positional_or_keyword == 1:
+    if max_num(ss.positional_only) + max_num(ss.positional_or_keyword) == 1:
         return ArgumentType.ONE_ARGUMENT
     if (
-        ss.positional_only + ss.positional_or_keyword > 1
-        and ss.positional_only >= 1
+        max_num(ss.positional_only) + max_num(ss.positional_or_keyword) > 1
+        and min_num(ss.positional_only) >= 1
         or ss.var_positional
         and not ss.var_keyword
     ):
         return ArgumentType.VARIABLE_LENGTH_ARGUMENT
+    if min_num(ss.positional_only) + min_num(ss.positional_or_keyword) <= 1:
+        return ArgumentType.K2O_FALLBACKABLE
     return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 
 
