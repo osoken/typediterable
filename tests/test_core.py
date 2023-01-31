@@ -351,7 +351,7 @@ def test_auto_adopt_keyword_only_argument() -> None:
             core.SignatureSummary(positional_or_keyword=2, keyword_only=2, var_positional=True, var_keyword=True),
             core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
         ],
-        [core.SignatureSummary(positional_or_keyword=[1, 2]), core.ArgumentType.K2O_FALLBACKABLE],
+        [core.SignatureSummary(positional_or_keyword=core.IntRange(1, 2)), core.ArgumentType.K2O_FALLBACKABLE],
     ],
 )
 def test__compute_argument_type_by_signature_summary(ss: core.SignatureSummary, expected: core.ArgumentType) -> None:

@@ -21,19 +21,54 @@ class ArgumentType(str, Enum):
     K2O_FALLBACKABLE = "K2O_FALLBACKABLE"
 
 
-IntRange = Tuple[int, int]
+class IntRange:
+    def __init__(self, imin: int, imax: int):
+        self._imin = imin
+        self._imax = imax
+
+    def __add__(self, i: Union[int, "IntRange"]) -> "IntRange":
+        res = self.__class__(self.min, self.max)
+        res += i
+        return res
+
+    def __iadd__(self, i: Union[int, "IntRange"]) -> "IntRange":
+        if isinstance(i, int):
+            self._imin += 1
+            self._imax += 1
+        self._imin += i.min
+        self._imax += i.max
+        return self
+
+    def __getitem__(self, idx: int) -> int:
+        if idx < 0 or 2 <= idx:
+            raise IndexError(idx)
+        if idx == 0:
+            return self.min
+        return self.max
+
+    @property
+    def min(self) -> int:
+        return self._imin
+
+    @property
+    def max(self) -> int:
+        return self._imax
+
+
+def is_empty(self, param: Parameter) -> bool:
+    return param.default == Parameter.empty
 
 
 def max_num(x: Union[int, IntRange]) -> int:
     if isinstance(x, int):
         return x
-    return max(x)
+    return x.max
 
 
 def min_num(x: Union[int, IntRange]) -> int:
     if isinstance(x, int):
         return x
-    return min(x)
+    return x.min
 
 
 @dataclass(frozen=True)
@@ -46,18 +81,19 @@ class SignatureSummary:
 
 
 def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
-    positional_only = 0
-    positional_or_keyword = 0
+    positional_only: Union[int, IntRange] = 0
+    positional_or_keyword: Union[int, IntRange] = 0
     var_positional = False
-    keyword_only = 0
+    keyword_only: Union[int, IntRange] = 0
     var_keyword = False
     for p in s.parameters.values():
         if p.kind == Parameter.POSITIONAL_ONLY:
-            positional_only += 1
+            print(p.default)
+            positional_only = positional_only + 1
         elif p.kind == Parameter.POSITIONAL_OR_KEYWORD:
-            positional_or_keyword += 1
+            positional_or_keyword = positional_or_keyword + 1
         elif p.kind == Parameter.KEYWORD_ONLY:
-            keyword_only += 1
+            keyword_only = keyword_only + 1
         elif p.kind == Parameter.VAR_POSITIONAL:
             var_positional = True
         elif p.kind == Parameter.VAR_KEYWORD:
