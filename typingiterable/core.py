@@ -88,7 +88,6 @@ def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
     var_keyword = False
     for p in s.parameters.values():
         if p.kind == Parameter.POSITIONAL_ONLY:
-            print(p.default)
             positional_only = positional_only + 1
         elif p.kind == Parameter.POSITIONAL_OR_KEYWORD:
             positional_or_keyword = positional_or_keyword + 1
