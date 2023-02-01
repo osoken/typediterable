@@ -522,7 +522,7 @@ def test__compute_argument_type_by_signature_summary_error_cases(ss: core.Signat
                     Parameter(name="name", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str, default="john"),
                 )
             ),
-            core.SignatureSummary(positional_or_keyword=[1, 2]),
+            core.SignatureSummary(positional_or_keyword=core.IntRange(1, 2)),
         ],
     ],
 )

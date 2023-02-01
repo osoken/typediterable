@@ -54,6 +54,11 @@ class IntRange:
     def max(self) -> int:
         return self._imax
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, IntRange):
+            return self.min == other.min and self.max == other.max
+        return False
+
 
 def is_empty(self, param: Parameter) -> bool:
     return param.default == Parameter.empty
@@ -88,11 +93,29 @@ def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
     var_keyword = False
     for p in s.parameters.values():
         if p.kind == Parameter.POSITIONAL_ONLY:
-            positional_only = positional_only + 1
+            if p.default != Parameter.empty:
+                if isinstance(positional_only, int):
+                    positional_only = IntRange(positional_only, positional_only + 1)
+                else:
+                    positional_only += IntRange(0, 1)
+            else:
+                positional_only += 1
         elif p.kind == Parameter.POSITIONAL_OR_KEYWORD:
-            positional_or_keyword = positional_or_keyword + 1
+            if p.default != Parameter.empty:
+                if isinstance(positional_or_keyword, int):
+                    positional_or_keyword = IntRange(positional_or_keyword, positional_or_keyword + 1)
+                else:
+                    positional_or_keyword += IntRange(0, 1)
+            else:
+                positional_or_keyword += 1
         elif p.kind == Parameter.KEYWORD_ONLY:
-            keyword_only = keyword_only + 1
+            if p.default != Parameter.empty:
+                if isinstance(keyword_only, int):
+                    keyword_only = IntRange(keyword_only, keyword_only + 1)
+                else:
+                    keyword_only += IntRange(0, 1)
+            else:
+                keyword_only += 1
         elif p.kind == Parameter.VAR_POSITIONAL:
             var_positional = True
         elif p.kind == Parameter.VAR_KEYWORD:
