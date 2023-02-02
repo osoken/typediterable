@@ -35,8 +35,11 @@ class IntRange:
         if isinstance(i, int):
             self._imin += 1
             self._imax += 1
-        self._imin += i.min
-        self._imax += i.max
+        elif isinstance(i, IntRange):
+            self._imin += i.min
+            self._imax += i.max
+        else:
+            raise TypeError(type(i))
         return self
 
     def __getitem__(self, idx: int) -> int:
@@ -58,10 +61,6 @@ class IntRange:
         if isinstance(other, IntRange):
             return self.min == other.min and self.max == other.max
         return False
-
-
-def is_empty(self, param: Parameter) -> bool:
-    return param.default == Parameter.empty
 
 
 def max_num(x: Union[int, IntRange]) -> int:
@@ -191,7 +190,7 @@ class GenericK2OFallbackableTypingIterable(Generic[T], GenericTypingIterable[T])
             return self._t(**d)
         except TypeError:
             ...
-        return self._t(d)
+        return self._t(d)  # type: ignore [call-arg]
 
 
 class GenericTypingIterableFactory:
