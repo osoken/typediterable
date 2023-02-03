@@ -1,6 +1,4 @@
-from collections import OrderedDict
 from inspect import Parameter, Signature
-from types import MappingProxyType
 from typing import Any
 
 import pytest
@@ -44,6 +42,11 @@ class KeywordOnlyArgumentDataType(TwoArgumentDataType):
         if not isinstance(other, KeywordOnlyArgumentDataType):
             return False
         return self.text == other.text
+
+
+class TwoArgumentOneDefaultDataType(TwoArgumentDataType):
+    def __init__(self, x: int, y: int = 0):
+        super(TwoArgumentOneDefaultDataType, self).__init__(x, y)
 
 
 def test_iterate() -> None:
@@ -348,6 +351,7 @@ def test_auto_adopt_keyword_only_argument() -> None:
             core.SignatureSummary(positional_or_keyword=2, keyword_only=2, var_positional=True, var_keyword=True),
             core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
         ],
+        [core.SignatureSummary(positional_or_keyword=core.IntRange(1, 2)), core.ArgumentType.K2O_FALLBACKABLE],
     ],
 )
 def test__compute_argument_type_by_signature_summary(ss: core.SignatureSummary, expected: core.ArgumentType) -> None:
@@ -511,8 +515,33 @@ def test__compute_argument_type_by_signature_summary_error_cases(ss: core.Signat
                 positional_only=1, positional_or_keyword=2, var_positional=True, keyword_only=1, var_keyword=True
             ),
         ],
+        [
+            Signature(
+                parameters=(
+                    Parameter(name="id", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str),
+                    Parameter(name="name", kind=Parameter.POSITIONAL_OR_KEYWORD, annotation=str, default="john"),
+                )
+            ),
+            core.SignatureSummary(positional_or_keyword=core.IntRange(1, 2)),
+        ],
     ],
 )
 def test__compute_signature_summary_by_signature(sig: Signature, expected: core.SignatureSummary) -> None:
     actual = core._compute_signature_summary_by_signature(sig)
     assert actual == expected
+
+
+def test_type_with_default() -> None:
+    raw_data = [10]
+    expected = [TwoArgumentOneDefaultDataType(10)]
+
+    assert list(typingiterable.TypingIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
+
+
+def test_k2o_fallbackable_typing_itrerable() -> None:
+    from typingiterable.core import K2OFallbackableTypingIterable
+
+    raw_data = [10, {"x": 1, "y": 2}]
+    expected = [TwoArgumentOneDefaultDataType(10), TwoArgumentOneDefaultDataType(x=1, y=2)]
+
+    assert list(K2OFallbackableTypingIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected

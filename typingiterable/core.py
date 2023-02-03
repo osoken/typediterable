@@ -8,7 +8,7 @@ else:
     from collections.abc import Callable, Iterable
 
 from enum import Enum
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, Tuple, Type, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -18,30 +18,103 @@ class ArgumentType(str, Enum):
     ONE_ARGUMENT = "ONE_ARGUMENT"
     VARIABLE_LENGTH_ARGUMENT = "VARIABLE_LENGTH_ARGUMENT"
     VARIABLE_LENGTH_KEYWORD_ARGUMENT = "VARIABLE_LENGTH_KEYWORD_ARGUMENT"
+    K2O_FALLBACKABLE = "K2O_FALLBACKABLE"
+
+
+class IntRange:
+    def __init__(self, imin: int, imax: int):
+        self._imin = imin
+        self._imax = imax
+
+    def __add__(self, i: Union[int, "IntRange"]) -> "IntRange":
+        res = self.__class__(self.min, self.max)
+        res += i
+        return res
+
+    def __iadd__(self, i: Union[int, "IntRange"]) -> "IntRange":
+        if isinstance(i, int):
+            self._imin += 1
+            self._imax += 1
+        elif isinstance(i, IntRange):
+            self._imin += i.min
+            self._imax += i.max
+        else:
+            raise TypeError(type(i))
+        return self
+
+    def __getitem__(self, idx: int) -> int:
+        if idx < 0 or 2 <= idx:
+            raise IndexError(idx)
+        if idx == 0:
+            return self.min
+        return self.max
+
+    @property
+    def min(self) -> int:
+        return self._imin
+
+    @property
+    def max(self) -> int:
+        return self._imax
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, IntRange):
+            return self.min == other.min and self.max == other.max
+        return False
+
+
+def max_num(x: Union[int, IntRange]) -> int:
+    if isinstance(x, int):
+        return x
+    return x.max
+
+
+def min_num(x: Union[int, IntRange]) -> int:
+    if isinstance(x, int):
+        return x
+    return x.min
 
 
 @dataclass(frozen=True)
 class SignatureSummary:
-    positional_only: int = 0
-    positional_or_keyword: int = 0
+    positional_only: Union[int, IntRange] = 0
+    positional_or_keyword: Union[int, IntRange] = 0
     var_positional: bool = False
-    keyword_only: int = 0
+    keyword_only: Union[int, IntRange] = 0
     var_keyword: bool = False
 
 
 def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
-    positional_only = 0
-    positional_or_keyword = 0
+    positional_only: Union[int, IntRange] = 0
+    positional_or_keyword: Union[int, IntRange] = 0
     var_positional = False
-    keyword_only = 0
+    keyword_only: Union[int, IntRange] = 0
     var_keyword = False
     for p in s.parameters.values():
         if p.kind == Parameter.POSITIONAL_ONLY:
-            positional_only += 1
+            if p.default != Parameter.empty:
+                if isinstance(positional_only, int):
+                    positional_only = IntRange(positional_only, positional_only + 1)
+                else:
+                    positional_only += IntRange(0, 1)
+            else:
+                positional_only += 1
         elif p.kind == Parameter.POSITIONAL_OR_KEYWORD:
-            positional_or_keyword += 1
+            if p.default != Parameter.empty:
+                if isinstance(positional_or_keyword, int):
+                    positional_or_keyword = IntRange(positional_or_keyword, positional_or_keyword + 1)
+                else:
+                    positional_or_keyword += IntRange(0, 1)
+            else:
+                positional_or_keyword += 1
         elif p.kind == Parameter.KEYWORD_ONLY:
-            keyword_only += 1
+            if p.default != Parameter.empty:
+                if isinstance(keyword_only, int):
+                    keyword_only = IntRange(keyword_only, keyword_only + 1)
+                else:
+                    keyword_only += IntRange(0, 1)
+            else:
+                keyword_only += 1
         elif p.kind == Parameter.VAR_POSITIONAL:
             var_positional = True
         elif p.kind == Parameter.VAR_KEYWORD:
@@ -56,25 +129,27 @@ def _compute_signature_summary_by_signature(s: Signature) -> SignatureSummary:
 
 
 def _compute_argument_type_by_signature_summary(ss: SignatureSummary) -> ArgumentType:
-    if ss.positional_only > 0 and ss.keyword_only > 0:
+    if max_num(ss.positional_only) > 0 and max_num(ss.keyword_only) > 0:
         raise ValueError("signature not supported")
-    if ss.positional_only == 0 and ss.keyword_only == 0 and ss.positional_or_keyword == 0:
+    if max_num(ss.positional_only) == 0 and max_num(ss.keyword_only) == 0 and max_num(ss.positional_or_keyword) == 0:
         if ss.var_positional:
             return ArgumentType.VARIABLE_LENGTH_ARGUMENT
         elif ss.var_keyword:
             return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
         raise ValueError("signature not supported")
-    if ss.keyword_only > 0:
+    if min_num(ss.keyword_only) > 0:
         return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
-    if ss.positional_only + ss.positional_or_keyword == 1:
+    if max_num(ss.positional_only) + max_num(ss.positional_or_keyword) == 1:
         return ArgumentType.ONE_ARGUMENT
     if (
-        ss.positional_only + ss.positional_or_keyword > 1
-        and ss.positional_only >= 1
+        max_num(ss.positional_only) + max_num(ss.positional_or_keyword) > 1
+        and min_num(ss.positional_only) >= 1
         or ss.var_positional
         and not ss.var_keyword
     ):
         return ArgumentType.VARIABLE_LENGTH_ARGUMENT
+    if min_num(ss.positional_only) + min_num(ss.positional_or_keyword) <= 1:
+        return ArgumentType.K2O_FALLBACKABLE
     return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 
 
@@ -109,6 +184,15 @@ class GenericVariableLengthArgumentKeywordTypingIterable(Generic[T], GenericTypi
         return self._t(**d)
 
 
+class GenericK2OFallbackableTypingIterable(Generic[T], GenericTypingIterable[T]):
+    def _cast(self, d: Any) -> T:
+        try:
+            return self._t(**d)
+        except TypeError:
+            ...
+        return self._t(d)  # type: ignore [call-arg]
+
+
 class GenericTypingIterableFactory:
     def __init__(self, argument_type: ArgumentType = ArgumentType.ONE_ARGUMENT):
         self._argument_type = argument_type
@@ -125,6 +209,8 @@ class GenericTypingIterableFactory:
             return GenericVariableLengthArgumentTypingIterable[T](t)
         elif at == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
             return GenericVariableLengthArgumentKeywordTypingIterable[T](t)
+        elif at == ArgumentType.K2O_FALLBACKABLE:
+            return GenericK2OFallbackableTypingIterable[T](t)
         return GenericTypingIterable[T](t)
 
 
@@ -134,3 +220,6 @@ VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_typ
 VariableLengthKeywordArgumentTypingIterable = GenericTypingIterableFactory(
     argument_type=ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 )
+VarArgTypingIterable = VariableLengthArgumentTypingIterable
+KwArgTypingIterable = VariableLengthKeywordArgumentTypingIterable
+K2OFallbackableTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.K2O_FALLBACKABLE)
