@@ -1,10 +1,10 @@
-site_name: typingiterable documentation
+site_name: typediterable documentation
 site_description: A Simple python package to apply typing to iterables.
 
 theme:
   name: "material"
-repo_name: osoken/typingiterable
-repo_url: https://github.com/osoken/typingiterable
+repo_name: osoken/typediterable
+repo_url: https://github.com/osoken/typediterable
 plugins:
   - include-markdown
   - search

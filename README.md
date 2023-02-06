@@ -1,22 +1,22 @@
-# typingiterable
+# typediterable
 
-`typingiterable` is a simple python package for the actual typing of each element of an iterable with type hint notation.
+`typediterable` is a simple python package for the actual typing of each element of an iterable with type hint notation.
 
 ## Install
 
 ```
-pip install git+ssh://git@github.com/osoken/typingiterable.git
+pip install git+ssh://git@github.com/osoken/typediterable.git
 ```
 
 ## Features and Examples
 
 ### Actual Typing with Type Hint Notation
 
-The following example shows how the main component `typingiterable.TypingIterable` works:
+The following example shows how the main component `typediterable.TypedIterable` works:
 
 ```py
 from dataclasses import dataclass
-from typingiterable import TypingIterable
+from typediterable import TypedIterable
 
 @dataclass
 class User:
@@ -24,7 +24,7 @@ class User:
     name: str
 
 raw_data = [{"id": 0, "name": "Alice"}, {"id": 1, "name": "Bob"}]
-for d in TypingIterable[User](raw_data):
+for d in TypedIterable[User](raw_data):
     assert isinstance(d, User)
 ```
 
@@ -32,7 +32,7 @@ It is equivalent to write:
 
 ```py
 from dataclasses import dataclass
-from typingiterable import TypingIterable
+from typediterable import TypedIterable
 
 @dataclass
 class User:
@@ -46,11 +46,11 @@ for d in (User(**d) for d in raw_data):
 
 ### Error Handling
 
-`typingiterable.TypingIterable` also has the error handling feature.
+`typediterable.TypedIterable` also has the error handling feature.
 
 ```py
 from dataclasses import dataclass
-from typingiterable import TypingIterable
+from typediterable import TypedIterable
 from collections.abc import Mapping
 from typing import Union
 
@@ -63,7 +63,7 @@ def error_handler(d: Mapping[int, Union[int, str]], i: int, e: Exception) -> Non
     print(f"{i}th element `{d}` is invalid due to the following error: {e}")
 
 raw_data = [{"id": 0, "name": "Alice"}, {"name": "lack of id"}, {"id": 1, "name": "Bob"}]
-for d in TypingIterable[User](raw_data, on_error=error_handler):
+for d in TypedIterable[User](raw_data, on_error=error_handler):
     assert isinstance(d, User)
 ```
 
@@ -78,7 +78,7 @@ The example is equivalent to write:
 
 ```py
 from dataclasses import dataclass
-from typingiterable import TypingIterable
+from typediterable import TypedIterable
 from collections.abc import Mapping
 from typing import Union
 
@@ -98,14 +98,14 @@ for i, raw_d in enumerate(raw_data):
 
 ### Automatic Unpacking Arguments
 
-`typingiterable.TypingIterable` checks the signature and automatically unpacks the arguments.
+`typediterable.TypedIterable` checks the signature and automatically unpacks the arguments.
 For functions which takes multiple positional arguments or multiple keyword arguments, such as `dataclass` and `pydantic.BaseModel`, it unpacks just like the above example.
 If the function is single-argument, no unpacking is done.
 
 ```py
-from typingiterable import TypingIterable
+from typediterable import TypedIterable
 
 raw_data = ["1", "2", "3", "4"]
-for d in TypingIterable[int](raw_data):
+for d in TypedIterable[int](raw_data):
     assert isinstance(d, int)
 ```
