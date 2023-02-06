@@ -1,8 +1,8 @@
 # Usage
 
-## `TypingIterable`
+## `TypedIterable`
 
-### `TypingIterable[T](...)`
+### `TypedIterable[T](...)`
 
 Constractor.
 

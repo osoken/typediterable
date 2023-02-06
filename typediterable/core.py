@@ -153,7 +153,7 @@ def _compute_argument_type_by_signature_summary(ss: SignatureSummary) -> Argumen
     return ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 
 
-class GenericTypingIterable(Generic[T]):
+class GenericTypedIterable(Generic[T]):
     def __init__(self, t: Type[T]):
         self._t = t
 
@@ -174,17 +174,17 @@ class GenericTypingIterable(Generic[T]):
                 yield self._cast(d)
 
 
-class GenericVariableLengthArgumentTypingIterable(Generic[T], GenericTypingIterable[T]):
+class GenericVariableLengthArgumentTypedIterable(Generic[T], GenericTypedIterable[T]):
     def _cast(self, d: Any) -> T:
         return self._t(*d)
 
 
-class GenericVariableLengthArgumentKeywordTypingIterable(Generic[T], GenericTypingIterable[T]):
+class GenericVariableLengthArgumentKeywordTypedIterable(Generic[T], GenericTypedIterable[T]):
     def _cast(self, d: Any) -> T:
         return self._t(**d)
 
 
-class GenericK2OFallbackableTypingIterable(Generic[T], GenericTypingIterable[T]):
+class GenericK2OFallbackableTypedIterable(Generic[T], GenericTypedIterable[T]):
     def _cast(self, d: Any) -> T:
         try:
             return self._t(**d)
@@ -193,33 +193,33 @@ class GenericK2OFallbackableTypingIterable(Generic[T], GenericTypingIterable[T])
         return self._t(d)  # type: ignore [call-arg]
 
 
-class GenericTypingIterableFactory:
+class GenericTypedIterableFactory:
     def __init__(self, argument_type: ArgumentType = ArgumentType.ONE_ARGUMENT):
         self._argument_type = argument_type
 
-    def __getitem__(self, t: Type[T]) -> GenericTypingIterable[T]:
+    def __getitem__(self, t: Type[T]) -> GenericTypedIterable[T]:
         at = self._argument_type
         if at == ArgumentType.AUTO:
             try:
                 sig = signature(t)
             except ValueError:
-                return GenericTypingIterable[T](t)
+                return GenericTypedIterable[T](t)
             at = _compute_argument_type_by_signature_summary(_compute_signature_summary_by_signature(sig))
         if at == ArgumentType.VARIABLE_LENGTH_ARGUMENT:
-            return GenericVariableLengthArgumentTypingIterable[T](t)
+            return GenericVariableLengthArgumentTypedIterable[T](t)
         elif at == ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT:
-            return GenericVariableLengthArgumentKeywordTypingIterable[T](t)
+            return GenericVariableLengthArgumentKeywordTypedIterable[T](t)
         elif at == ArgumentType.K2O_FALLBACKABLE:
-            return GenericK2OFallbackableTypingIterable[T](t)
-        return GenericTypingIterable[T](t)
+            return GenericK2OFallbackableTypedIterable[T](t)
+        return GenericTypedIterable[T](t)
 
 
-TypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.AUTO)
-OneArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.ONE_ARGUMENT)
-VariableLengthArgumentTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.VARIABLE_LENGTH_ARGUMENT)
-VariableLengthKeywordArgumentTypingIterable = GenericTypingIterableFactory(
+TypedIterable = GenericTypedIterableFactory(argument_type=ArgumentType.AUTO)
+OneArgumentTypedIterable = GenericTypedIterableFactory(argument_type=ArgumentType.ONE_ARGUMENT)
+VariableLengthArgumentTypedIterable = GenericTypedIterableFactory(argument_type=ArgumentType.VARIABLE_LENGTH_ARGUMENT)
+VariableLengthKeywordArgumentTypedIterable = GenericTypedIterableFactory(
     argument_type=ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT
 )
-VarArgTypingIterable = VariableLengthArgumentTypingIterable
-KwArgTypingIterable = VariableLengthKeywordArgumentTypingIterable
-K2OFallbackableTypingIterable = GenericTypingIterableFactory(argument_type=ArgumentType.K2O_FALLBACKABLE)
+VarArgTypedIterable = VariableLengthArgumentTypedIterable
+KwArgTypedIterable = VariableLengthKeywordArgumentTypedIterable
+K2OFallbackableTypedIterable = GenericTypedIterableFactory(argument_type=ArgumentType.K2O_FALLBACKABLE)

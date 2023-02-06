@@ -4,8 +4,8 @@ from typing import Any
 import pytest
 from pytest_mock import MockerFixture
 
-import typingiterable
-from typingiterable import core
+import typediterable
+from typediterable import core
 
 
 class TwoArgumentDataType:
@@ -50,14 +50,14 @@ class TwoArgumentOneDefaultDataType(TwoArgumentDataType):
 
 
 def test_iterate() -> None:
-    actual = list(typingiterable.TypingIterable[int](["122", "231", "0", "2", 2.3]))
+    actual = list(typediterable.TypedIterable[int](["122", "231", "0", "2", 2.3]))
     assert actual == [122, 231, 0, 2, 2]
 
 
 def test_default_error_handling() -> None:
     actual = []
     with pytest.raises(Exception):
-        for d in typingiterable.TypingIterable[int](["123", "321", "1.23", "432"]):
+        for d in typediterable.TypedIterable[int](["123", "321", "1.23", "432"]):
             actual.append(d)
     assert actual == [123, 321]
 
@@ -69,7 +69,7 @@ def test_pass_error_handler() -> None:
     def handler(d: str, idx: int, err: Exception) -> None:
         errors.append((d, idx))
 
-    for d in typingiterable.TypingIterable[int](["123", "321", "1.23", "432"], on_error=handler):
+    for d in typediterable.TypedIterable[int](["123", "321", "1.23", "432"], on_error=handler):
         actual.append(d)
     assert actual == [123, 321, 432]
     assert errors == [("1.23", 2)]
@@ -77,7 +77,7 @@ def test_pass_error_handler() -> None:
 
 def test_variable_length_arguments() -> None:
     actual = []
-    for d in typingiterable.VariableLengthArgumentTypingIterable[TwoArgumentDataType]([(10, 12), (-1, 3), (-3, -3)]):
+    for d in typediterable.VariableLengthArgumentTypedIterable[TwoArgumentDataType]([(10, 12), (-1, 3), (-3, -3)]):
         actual.append(d)
 
     assert actual == [TwoArgumentDataType(10, 12), TwoArgumentDataType(-1, 3), TwoArgumentDataType(-3, -3)]
@@ -85,7 +85,7 @@ def test_variable_length_arguments() -> None:
 
 def test_variable_length_keyword_arguments() -> None:
     actual = []
-    for d in typingiterable.VariableLengthKeywordArgumentTypingIterable[TwoArgumentDataType](
+    for d in typediterable.VariableLengthKeywordArgumentTypedIterable[TwoArgumentDataType](
         [{"x": 10, "y": 12}, {"x": -1, "y": 3}, {"x": -3, "y": -3}, {"y": 0, "x": 0}]
     ):
         actual.append(d)
@@ -100,7 +100,7 @@ def test_variable_length_keyword_arguments() -> None:
 
 def test_keyword_only_arguments() -> None:
     actual = []
-    for d in typingiterable.VariableLengthKeywordArgumentTypingIterable[KeywordOnlyArgumentDataType](
+    for d in typediterable.VariableLengthKeywordArgumentTypedIterable[KeywordOnlyArgumentDataType](
         [
             {"x": 10, "y": 12, "text": "one"},
             {"x": -1, "y": 3, "text": "two"},
@@ -121,26 +121,24 @@ def test_keyword_only_arguments() -> None:
 @pytest.mark.parametrize(
     ["argument_type", "patch"],
     [
-        [core.ArgumentType.ONE_ARGUMENT, "typingiterable.core.GenericTypingIterable"],
-        [core.ArgumentType.VARIABLE_LENGTH_ARGUMENT, "typingiterable.core.GenericVariableLengthArgumentTypingIterable"],
+        [core.ArgumentType.ONE_ARGUMENT, "typediterable.core.GenericTypedIterable"],
+        [core.ArgumentType.VARIABLE_LENGTH_ARGUMENT, "typediterable.core.GenericVariableLengthArgumentTypedIterable"],
         [
             core.ArgumentType.VARIABLE_LENGTH_KEYWORD_ARGUMENT,
-            "typingiterable.core.GenericVariableLengthArgumentKeywordTypingIterable",
+            "typediterable.core.GenericVariableLengthArgumentKeywordTypedIterable",
         ],
     ],
 )
 def test_auto_argument_type(argument_type: core.ArgumentType, patch: str, mocker: MockerFixture) -> None:
     expected = mocker.patch(patch)
-    signature = mocker.patch("typingiterable.core.signature")
-    _compute_signature_summary_by_signature = mocker.patch(
-        "typingiterable.core._compute_signature_summary_by_signature"
-    )
+    signature = mocker.patch("typediterable.core.signature")
+    _compute_signature_summary_by_signature = mocker.patch("typediterable.core._compute_signature_summary_by_signature")
     _compute_argument_type_by_signature_summary = mocker.patch(
-        "typingiterable.core._compute_argument_type_by_signature_summary"
+        "typediterable.core._compute_argument_type_by_signature_summary"
     )
     _compute_argument_type_by_signature_summary.return_value = argument_type
 
-    actual = typingiterable.TypingIterable[TwoArgumentDataType]([])
+    actual = typediterable.TypedIterable[TwoArgumentDataType]([])
     signature.assert_called_once_with(TwoArgumentDataType)
     _compute_signature_summary_by_signature.assert_called_once_with(signature.return_value)
     _compute_argument_type_by_signature_summary.assert_called_once_with(
@@ -151,7 +149,7 @@ def test_auto_argument_type(argument_type: core.ArgumentType, patch: str, mocker
 
 def test_auto_adopt_keyword_only_argument() -> None:
     actual = []
-    for d in typingiterable.TypingIterable[KeywordOnlyArgumentDataType](
+    for d in typediterable.TypedIterable[KeywordOnlyArgumentDataType](
         [
             {"x": 10, "y": 12, "text": "one"},
             {"x": -1, "y": 3, "text": "two"},
@@ -535,13 +533,13 @@ def test_type_with_default() -> None:
     raw_data = [10]
     expected = [TwoArgumentOneDefaultDataType(10)]
 
-    assert list(typingiterable.TypingIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
+    assert list(typediterable.TypedIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
 
 
 def test_k2o_fallbackable_typing_itrerable() -> None:
-    from typingiterable.core import K2OFallbackableTypingIterable
+    from typediterable.core import K2OFallbackableTypedIterable
 
     raw_data = [10, {"x": 1, "y": 2}]
     expected = [TwoArgumentOneDefaultDataType(10), TwoArgumentOneDefaultDataType(x=1, y=2)]
 
-    assert list(K2OFallbackableTypingIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
+    assert list(K2OFallbackableTypedIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
