@@ -59,7 +59,7 @@ class User:
     id: int
     name: str
 
-def error_handler(d: Mapping[int, Union[int, str]], i: int, e: Exception) -> None:
+def error_handler(d: Mapping[str, Union[int, str]], i: int, e: Exception) -> None:
     print(f"{i}th element `{d}` is invalid due to the following error: {e}")
 
 raw_data = [{"id": 0, "name": "Alice"}, {"name": "lack of id"}, {"id": 1, "name": "Bob"}]
