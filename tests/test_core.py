@@ -1,6 +1,6 @@
+from dataclasses import dataclass
 from inspect import Parameter, Signature
 from typing import Any
-from dataclasses import dataclass
 
 import pytest
 from pytest_mock import MockerFixture
@@ -54,6 +54,7 @@ class TwoArgumentOneDefaultDataType(TwoArgumentDataType):
 class User:
     name: str
     id: int = 0
+
 
 def test_iterate() -> None:
     actual = list(typediterable.TypedIterable[int](["122", "231", "0", "2", 2.3]))
@@ -554,4 +555,4 @@ def test_k2o_fallbackable_typing_itrerable() -> None:
 def test_adoptive_cast() -> None:
     raw_data = ["aa", ("bb", 10), {"id": 20, "name": "cc"}]
     expected = [User(id=0, name="aa"), User(id=10, name="bb"), User(id=20, name="cc")]
-    assert list(typingiterable.TypingIterable[User](raw_data)) == expected
+    assert list(typediterable.TypedIterable[User](raw_data)) == expected
