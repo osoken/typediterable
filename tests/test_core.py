@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from inspect import Parameter, Signature
 from typing import Any
-from dataclasses import dataclass
 
 import pytest
 from pytest_mock import MockerFixture
@@ -56,10 +55,7 @@ class User:
     name: str
     id: int = 0
 
-<<<<<<< HEAD
 
-=======
->>>>>>> aeff7f2241278c00f86e22621c6ad8a4fb8cbbac
 def test_iterate() -> None:
     actual = list(typediterable.TypedIterable[int](["122", "231", "0", "2", 2.3]))
     assert actual == [122, 231, 0, 2, 2]
