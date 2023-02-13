@@ -555,4 +555,4 @@ def test_k2o_fallbackable_typing_itrerable() -> None:
 def test_adoptive_cast() -> None:
     raw_data = ["aa", ("bb", 10), {"id": 20, "name": "cc"}]
     expected = [User(id=0, name="aa"), User(id=10, name="bb"), User(id=20, name="cc")]
-    assert list(typediterable.TypedIterable[User](raw_data)) == expected
+    assert list(typediterable.AdaptiveTypedIterable[User](raw_data)) == expected
