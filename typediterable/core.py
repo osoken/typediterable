@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from inspect import Parameter, Signature, signature
 
 if sys.version_info < (3, 9):
-    from typing import Callable, Iterable
+    from typing import Callable, Iterable, Mapping
 else:
-    from collections.abc import Callable, Iterable
+    from collections.abc import Callable, Iterable, Mapping
 
 from enum import Enum
 from typing import Any, Generic, Optional, Tuple, Type, TypeVar, Union
@@ -15,6 +15,7 @@ T = TypeVar("T")
 
 class ArgumentType(str, Enum):
     AUTO = "AUTO"
+    ADAPTIVE = "ADAPTIVE"
     ONE_ARGUMENT = "ONE_ARGUMENT"
     VARIABLE_LENGTH_ARGUMENT = "VARIABLE_LENGTH_ARGUMENT"
     VARIABLE_LENGTH_KEYWORD_ARGUMENT = "VARIABLE_LENGTH_KEYWORD_ARGUMENT"
@@ -193,6 +194,22 @@ class GenericK2OFallbackableTypedIterable(Generic[T], GenericTypedIterable[T]):
         return self._t(d)  # type: ignore [call-arg]
 
 
+class GenericAdaptiveTypedIterable(Generic[T], GenericTypedIterable[T]):
+    def _cast(self, d: Any) -> T:
+        if isinstance(d, Iterable) and not isinstance(d, (str, bytes)):
+            if isinstance(d, Mapping):
+                try:
+                    return self._t(**d)
+                except TypeError:
+                    ...
+            else:
+                try:
+                    return self._t(*d)
+                except TypeError:
+                    ...
+        return self._t(d)  # type: ignore [call-arg]
+
+
 class GenericTypedIterableFactory:
     def __init__(self, argument_type: ArgumentType = ArgumentType.ONE_ARGUMENT):
         self._argument_type = argument_type
@@ -211,6 +228,8 @@ class GenericTypedIterableFactory:
             return GenericVariableLengthArgumentKeywordTypedIterable[T](t)
         elif at == ArgumentType.K2O_FALLBACKABLE:
             return GenericK2OFallbackableTypedIterable[T](t)
+        elif at == ArgumentType.ADAPTIVE:
+            return GenericAdaptiveTypedIterable[T](t)
         return GenericTypedIterable[T](t)
 
 
@@ -223,3 +242,4 @@ VariableLengthKeywordArgumentTypedIterable = GenericTypedIterableFactory(
 VarArgTypedIterable = VariableLengthArgumentTypedIterable
 KwArgTypedIterable = VariableLengthKeywordArgumentTypedIterable
 K2OFallbackableTypedIterable = GenericTypedIterableFactory(argument_type=ArgumentType.K2O_FALLBACKABLE)
+AdaptiveTypedIterable = GenericTypedIterableFactory(argument_type=ArgumentType.ADAPTIVE)

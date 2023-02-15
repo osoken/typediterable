@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from inspect import Parameter, Signature
 from typing import Any
 
@@ -47,6 +48,12 @@ class KeywordOnlyArgumentDataType(TwoArgumentDataType):
 class TwoArgumentOneDefaultDataType(TwoArgumentDataType):
     def __init__(self, x: int, y: int = 0):
         super(TwoArgumentOneDefaultDataType, self).__init__(x, y)
+
+
+@dataclass
+class User:
+    name: str
+    id: int = 0
 
 
 def test_iterate() -> None:
@@ -543,3 +550,9 @@ def test_k2o_fallbackable_typing_itrerable() -> None:
     expected = [TwoArgumentOneDefaultDataType(10), TwoArgumentOneDefaultDataType(x=1, y=2)]
 
     assert list(K2OFallbackableTypedIterable[TwoArgumentOneDefaultDataType](raw_data)) == expected
+
+
+def test_adoptive_cast() -> None:
+    raw_data = ["aa", ("bb", 10), {"id": 20, "name": "cc"}]
+    expected = [User(id=0, name="aa"), User(id=10, name="bb"), User(id=20, name="cc")]
+    assert list(typediterable.AdaptiveTypedIterable[User](raw_data)) == expected
